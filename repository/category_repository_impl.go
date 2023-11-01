@@ -11,6 +11,10 @@ import (
 type CategoryRepositoryImpl struct {
 }
 
+func NewCategoryRepository() CategoryRepository {
+	return &CategoryRepositoryImpl{}
+}
+
 func (repository *CategoryRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category {
 	SQL := "INSERT INTO category (name) VALUES (?)"
 	result, err := tx.ExecContext(ctx, SQL, category.Name)
@@ -40,6 +44,7 @@ func (repository *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx
 func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, categoryId int) (domain.Category, error) {
 	SQL := "SELECT id, name FROM category WHERE id=?"
 	rows, err := tx.QueryContext(ctx, SQL, categoryId)
+	defer rows.Close()
 	helper.PanicIfErr(err)
 
 	category := domain.Category{}
@@ -54,6 +59,7 @@ func (repository *CategoryRepositoryImpl) FindById(ctx context.Context, tx *sql.
 func (repository *CategoryRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Category {
 	SQL := "SELECT id, name FROM category"
 	rows, err := tx.QueryContext(ctx, SQL)
+	defer rows.Close()
 	helper.PanicIfErr(err)
 
 	categories := []domain.Category{}
